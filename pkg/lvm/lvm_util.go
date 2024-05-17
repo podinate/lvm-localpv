@@ -1062,18 +1062,10 @@ func getThinPoolSize(vgname, volsize string) string {
 		return ""
 	}
 
-	volSize, err := strconv.ParseInt(strings.TrimSpace(string(volsize)), 10, 64)
-	if err != nil {
-		klog.Errorf("failed to convert volsize to int, got size,:%v , %v", volSize, err)
-		return ""
-	}
+	// thinpool size should be 95% of available disk space
+	size := string(int64(float64(vgFreeSize) * 0.95))
 
-	if vgFreeSize < volSize {
-		// reducing 268435456 bytes (256Mi) from the total byte size to round off
-		// blocks extent
-		return fmt.Sprint(vgFreeSize-MinExtentRoundOffSize) + "b"
-	}
-	return volsize + "b"
+	return size + "b"
 }
 
 // removeVolumeFilesystem will erases the filesystem signature from lvm volume
